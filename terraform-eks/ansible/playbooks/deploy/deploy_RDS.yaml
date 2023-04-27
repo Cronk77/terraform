@@ -1,0 +1,14 @@
+---
+- name: Deploy blue cluster and RDS
+  hosts: servers
+  # connection: local #Connection tells there isnt any need for SSH
+  gather_facts: False # Gather useful variables about remote hosts that can be used in playbooks
+  become: no # Not seting as Root
+  vars_files:
+    - "../../group_vars/all_vars.yaml"
+
+  tasks:
+    - name: Deploy RDS 
+      community.general.terraform:
+        project_path: '{{ rds_dir }}'
+        state: present

@@ -1,0 +1,8 @@
+---
+# RDS directory
+rds_dir: "../../../eks-solo-rds"
+blue_eks_dir: "../../../eks-blue"
+green_eks_dir: "../../../eks-green"
+blue_route53_dir: "../../../route53_blue"
+green_route53_dir: "../../../route53_green"
+

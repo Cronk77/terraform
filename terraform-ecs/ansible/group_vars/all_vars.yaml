@@ -1,0 +1,7 @@
+---
+# RDS directory
+rds_dir: "../../../ecs-solo-rds"
+blue_dir: "../../../ecs-blue" # Old Cluster
+green_dir: "../../../ecs-green" # Updated Cluster
+testing_time_interval: "3.00m"
+

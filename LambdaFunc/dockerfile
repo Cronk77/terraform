@@ -1,0 +1,9 @@
+FROM hashicorp/terraform:latest
+RUN mkdir /tfcode
+COPY ../cc-terraform-ecs /tfcode
+WORKDIR /tfcode
+ENV AWS_ACCESS_KEY_ID=''
+ENV AWS_SECRET_ACCESS_KEY=''
+ENV AWS_DEFAULT_REGION=''
+# ENTRYPOINT [ "terraform", "apply", "-auto-approve"]
+ENTRYPOINT [ "terraform", "apply", "-destroy", "-auto-approve"]

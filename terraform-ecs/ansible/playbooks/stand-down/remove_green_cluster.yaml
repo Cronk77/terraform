@@ -1,0 +1,15 @@
+---
+- name: Stand Down Green cluster
+  hosts: servers
+  # connection: local #Connection tells there isnt any need for SSH
+  gather_facts: False # Gather useful variables about remote hosts that can be used in playbooks
+  become: no # Not seting as Root
+  vars_files:
+    - "../../group_vars/all_vars.yaml"
+
+  tasks:
+    
+    - name: Use Terraform to destroy Green cluster
+      shell: |
+        cd "{{ green_dir }}"
+        terraform destroy -auto-approve

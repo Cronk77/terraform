@@ -1,0 +1,19 @@
+---
+- name: Switch traffic from blue cluster to green cluster
+  hosts: servers
+  # connection: local #Connection tells there isnt any need for SSH
+  gather_facts: False # Gather useful variables about remote hosts that can be used in playbooks
+  become: no # Not seting as Root
+  vars_files:
+    - "../../group_vars/all_vars.yaml"
+
+  tasks:
+    - name: Change Green cluster traffic weight to 100%
+      shell: |
+        cd "{{ green_route53_dir }}"
+        terraform apply -var weighted_green=100 -auto-approve
+        
+    - name: Change Blue cluster traffic weight to 0%
+      shell: |
+        cd "{{ blue_route53_dir }}"
+        terraform apply -var weighted_blue=0 -auto-approve

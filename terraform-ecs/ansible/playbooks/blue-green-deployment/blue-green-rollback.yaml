@@ -1,0 +1,19 @@
+---
+- name: Roll back traffic from Green cluster to Blue cluster
+  hosts: servers
+  # connection: local #Connection tells there isnt any need for SSH
+  gather_facts: False # Gather useful variables about remote hosts that can be used in playbooks
+  become: no # Not seting as Root
+  vars_files:
+    - "../../group_vars/all_vars.yaml"
+
+  tasks:
+    - name: Change Blue cluster traffic weight to 100%
+      shell: |
+        cd "{{ ecs_blue }}"
+        terraform apply -var weighted_percentage=100 -auto-approve
+        
+    - name: Change Green cluster traffic weight to 0%
+      shell: |
+        cd "{{ ecs_green }}"
+        terraform apply -var weighted_percentage=0 -auto-approve

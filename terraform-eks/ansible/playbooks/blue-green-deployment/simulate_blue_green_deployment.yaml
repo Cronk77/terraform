@@ -1,0 +1,82 @@
+---
+- name: Simulate a Blue green Deployment
+  hosts: servers
+  # connection: local #Connection tells there isnt any need for SSH
+  gather_facts: False # Gather useful variables about remote hosts that can be used in playbooks
+  become: no # Not seting as Root
+  vars_files:
+    - "../../group_vars/all_vars.yaml"
+
+  tasks:
+########################################################################
+    - name: Deploy RDS 
+      community.general.terraform:
+        project_path: '{{ rds_dir }}'
+        state: present
+
+    - name: Deploy Blue Cluster
+      shell: |
+        cd "{{ blue_eks_dir }}"
+        terraform apply -auto-approve
+
+
+########### Switch 1 - [ blue=100% :: green=0% ] ######################
+    - name: Deploy blue route for Route53 with 100% of Traffic
+      shell: |
+        cd "{{ blue_route53_dir }}"
+        terraform apply -var weighted_blue=100 -auto-approve
+
+    - name: Deploy Green Cluster
+      shell: |
+        cd "{{ green_eks_dir }}"
+        terraform apply -auto-approve
+
+    - name: Deploy green route for Route53 with 0% of Traffic
+      shell: |
+        cd "{{ green_route53_dir }}"
+        terraform apply -var weighted_green=0 -auto-approve
+
+    - name: Host machine sleeps for 3 minutes for Testing and verfification
+      shell: |
+        sleep 3.00m
+
+########### Switch 2 - [ blue=0% :: green=100% ] ######################
+    - name: Change Green cluster traffic weight to 100%
+      shell: |
+        cd "{{ green_route53_dir }}"
+        terraform apply -var weighted_green=100 -auto-approve
+        
+    - name: Change Blue cluster traffic weight to 0%
+      shell: |
+        cd "{{ blue_route53_dir }}"
+        terraform apply -var weighted_blue=0 -auto-approve
+
+    - name: Host machine sleeps for 3 minutes for Testing and verfification
+      shell: |
+        sleep 3.00m
+
+######################### Clean up ####################################
+    - name: Use Terraform to destroy blue route53 route
+      shell: |
+        cd "{{ blue_route53_dir }}"
+        terraform destroy -auto-approve
+    
+    - name: Use Terraform to destroy blue cluster
+      shell: |
+        cd "{{ blue_eks_dir }}"
+        terraform destroy -auto-approve
+
+    - name: Use Terraform to destroy Green route53 route
+      shell: |
+        cd "{{ green_route53_dir }}"
+        terraform destroy -auto-approve
+    
+    - name: Use Terraform to destroy Green cluster
+      shell: |
+        cd "{{ green_eks_dir }}"
+        terraform destroy -auto-approve
+
+    - name: Use Terraform to destroy RDS
+      shell: |
+        cd "{{ rds_dir }}"
+        terraform destroy -auto-approve
